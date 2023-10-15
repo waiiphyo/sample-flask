@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Docker login
+      run : docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build the Docker image
+      run: docker build -t sflask:latest .
+    - name: Tags
+      run: |
+        docker tag sflask ${{ secrets.DOCKER_USER }}/sflask:${{ github.sha }}
+        docker tag sflask ${{ secrets.DOCKER_USER }}/sflask:latest
+    - name: Push to docker hub
+      run : |   
+        docker push ${{ secrets.DOCKER_USER }}/sflask:latest
