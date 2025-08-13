@@ -23,3 +23,20 @@ jobs:
     - name: Push to docker hub
       run : |   
         docker push ${{ secrets.DOCKER_USER }}/sflask:latest
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send deployment notification to ClickUp
+        run: |
+          MESSAGE="✅ Deployment successful on branch: $GITHUB_REF_NAME"
+          curl -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
+            -H "Authorization: ${CLICKUP_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"name\": \"${MESSAGE}\",
+              \"description\": \"GitHub Commit: ${GITHUB_SHA}\nRepo: ${GITHUB_REPOSITORY}\",
+              \"status\": \"to do\"
+            }"
+        env:
+          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+          CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
