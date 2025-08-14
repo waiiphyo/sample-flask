@@ -38,23 +38,28 @@ jobs:
           if [ "${{ job.status }}" = "success" ]; then
             STATUS_ICON="🟢"
             STATUS_TEXT="**SUCCESS**"
-            FAIL_REASON=""
+            MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
+            **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
+            **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
+            **Commit Message:** ${COMMIT_MESSAGE}
+            **Description :** New changes apply on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
+            **Pushed By :** ${GITHUB_ACTOR}"
+            
           else
             STATUS_ICON="🔴"
             STATUS_TEXT="**FAILURE**"
             JOB_NAME="${{ github.job }}"
-            STEP_NAME="${{ steps.name }}"
             FAIL_REASON="**Job:** $JOB_NAME"
-          fi
-          
-          MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
-          **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
-          **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
-          **Commit Message:** ${COMMIT_MESSAGE}
-          **Description :** New changes apply on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
-          **Pushed By :** ${GITHUB_ACTOR}
-          **Failed By:** ${FAIL_REASON}"
+            MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
+            **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
+            **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
+            **Commit Message:** ${COMMIT_MESSAGE}
+            **Description :** New changes apply on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
+            **Pushed By :** ${GITHUB_ACTOR}
+            **Failed By:** ${FAIL_REASON}"
 
+          fi
+      
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
             --header "Authorization: ${CLICKUP_API_TOKEN}" \
