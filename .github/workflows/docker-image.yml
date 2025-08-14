@@ -40,7 +40,7 @@ jobs:
           REPO_LINK="https://github.com/${GITHUB_REPOSITORY}"
           COMMIT_LINK="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
           
-           if [ "${{ job.status }}" = "success" ]; then
+          if [ "${{ job.status }}" = "success" ]; then
             STATUS_ICON="🟢"
             STATUS_TEXT="**SUCCESS**"
             FAIL_REASON=""
@@ -50,11 +50,11 @@ jobs:
             FAIL_REASON="\n**Reason:** $(cat fail_reason.txt)"
           fi
           
-          MESSAGE="**Build Status:** ${{ job.status }}  
-          **Title:** Build  
+          MESSAGE="${STATUS_ICON} Build Status: ${STATUS_TEXT}
+          **Repository:** [${GITHUB_REPOSITORY}](${REPO_LINK})  
+          **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
           **Description:** New changes apply on : \`${GITHUB_REPOSITORY}\`
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
-          **Color:** #5144f4  
           **Repo:** [View Repo](${REPO_LINK})  
           **Pushed By:** ${GITHUB_ACTOR}
           **Triggered By:** ${GITHUB_ACTOR}${FAIL_REASON}"
