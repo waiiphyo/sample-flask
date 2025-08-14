@@ -28,7 +28,7 @@ jobs:
       if: failure()
       run: |
         echo "❌ Build failed because one of the test scripts returned a non-zero exit code." > fail_reason.txt
-        continue-on-error: true
+      continue-on-error: true
 
     - name: Send deployment notification to ClickUp
       if: always()
