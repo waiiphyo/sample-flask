@@ -39,12 +39,12 @@ jobs:
     
             STATUS_ICON="🟢"
             STATUS_TEXT="SUCCESS"
-            MESSAGE="### Build Result 
+            MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
             **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
             **Commit Message:** ${COMMIT_MESSAGE}
-            **Description :** New changes apply on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
+            **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}"
             
           else
@@ -52,12 +52,12 @@ jobs:
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="**Job:** $JOB_NAME"
-            MESSAGE="### Build Result 
+            MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
             **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
             **Commit Message:** ${COMMIT_MESSAGE}
-            **Description :** New changes apply on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
+            **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}
             **Failed By:** ${FAIL_REASON}"
 
