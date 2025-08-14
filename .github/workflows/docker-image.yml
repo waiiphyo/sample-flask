@@ -50,9 +50,8 @@ jobs:
           **Repository:** [${GITHUB_REPOSITORY}](${REPO_LINK})  
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
           **Description:** New changes apply on : \`${GITHUB_REPOSITORY}\`
-          **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
           **Pushed By:** ${GITHUB_ACTOR}
-          **Fail Step:** ${FAIL_REASON}"
+          **Failed By:** ${FAIL_REASON}"
 
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
