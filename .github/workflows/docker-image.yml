@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Docker login
-      run : docker login -u ${{ secrets.DOCKER_USR }} -p ${{ secrets.DOCKER_PASSWORD }}
+      run : docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
     - name: Build the Docker image
       run: docker build -t sflask:latest .
     - name: Tags
@@ -38,8 +38,8 @@ jobs:
           if [ "${{ job.status }}" = "success" ]; then
     
             STATUS_ICON="🟢"
-            STATUS_TEXT="**SUCCESS**"
-            MESSAGE="## Build Result 
+            STATUS_TEXT="SUCCESS"
+            MESSAGE="### Build Result 
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
             **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
@@ -49,10 +49,10 @@ jobs:
             
           else
             STATUS_ICON="🔴"
-            STATUS_TEXT="**FAILURE**"
+            STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="**Job:** $JOB_NAME"
-            MESSAGE="## Build Result 
+            MESSAGE="### Build Result 
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
             **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
