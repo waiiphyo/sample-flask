@@ -43,17 +43,15 @@ jobs:
             STATUS_TEXT="**FAILURE**"
             JOB_NAME="${{ github.job }}"
             STEP_NAME="${{ steps.name }}"
-            FAIL_REASON="**Job:** $JOB_NAME | **Failed Step:** $STEP_NAME"
+            FAIL_REASON="**Job:** $JOB_NAME"
           fi
           
           MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
           **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
-          **Commit :** [${GITHUB_SHA::7}](${COMMIT_LINK})  
-          **Description :** New changes apply on : \`${GITHUB_REPOSITORY}\`
+          **Commit :** [${GITHUB_SHA::7}](${COMMIT_LINK})
+          **Commit Message :** ${{ github.event.workflow_run.head_commit.message }}
+          **Description :** New changes apply on **Branch :** ${GITHUB_REF_NAME} of \`${GITHUB_REPOSITORY}\`
           **Pushed By :** ${GITHUB_ACTOR}
-          **Based By :** ${GITHUB_BASE_REF}
-          **Branch :** ${GITHUB_REF_NAME}
-          **Summary :** ${GITHUB_STEP_SUMMARY}
           **Failed By:** ${FAIL_REASON}"
 
           curl --request POST \
