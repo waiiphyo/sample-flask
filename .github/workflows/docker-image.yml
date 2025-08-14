@@ -36,9 +36,11 @@ jobs:
           COMMIT_LINK="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
           
           if [ "${{ job.status }}" = "success" ]; then
+    
             STATUS_ICON="🟢"
             STATUS_TEXT="**SUCCESS**"
-            MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
+            MESSAGE="## Build Result 
+            **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
             **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
             **Commit Message:** ${COMMIT_MESSAGE}
@@ -50,7 +52,8 @@ jobs:
             STATUS_TEXT="**FAILURE**"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="**Job:** $JOB_NAME"
-            MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
+            MESSAGE="## Build Result 
+            **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
             **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
             **Commit Message:** ${COMMIT_MESSAGE}
