@@ -30,6 +30,7 @@ jobs:
         CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
         CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
         CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
       run: |
           REPO_LINK="https://github.com/${GITHUB_REPOSITORY}"
           COMMIT_LINK="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
@@ -49,7 +50,7 @@ jobs:
           MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
           **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
           **Commit ID :** [${GITHUB_SHA::7}](${COMMIT_LINK})
-          **Commit Message:**'"${{ github.event.head_commit.message }}"'
+          **Commit Message:** ${COMMIT_MESSAGE}
           **Description :** New changes apply on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
           **Pushed By :** ${GITHUB_ACTOR}
           **Failed By:** ${FAIL_REASON}"
