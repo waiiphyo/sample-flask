@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Docker login
-      run : docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+      run : docker login -u ${{ secrets.DOCKER_USR }} -p ${{ secrets.DOCKER_PASSWORD }}
     - name: Build the Docker image
       run: docker build -t sflask:latest .
     - name: Tags
@@ -50,12 +50,11 @@ jobs:
             FAIL_REASON="\n**Reason:** $(cat fail_reason.txt)"
           fi
           
-          MESSAGE="${STATUS_ICON} Build Status: ${STATUS_TEXT}
+          MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
           **Repository:** [${GITHUB_REPOSITORY}](${REPO_LINK})  
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
           **Description:** New changes apply on : \`${GITHUB_REPOSITORY}\`
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
-          **Repo:** [View Repo](${REPO_LINK})  
           **Pushed By:** ${GITHUB_ACTOR}
           **Triggered By:** ${GITHUB_ACTOR}${FAIL_REASON}"
 
