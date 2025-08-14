@@ -25,6 +25,10 @@ jobs:
         docker push ${{ secrets.DOCKER_USER }}/sflask:latest
  
     - name: Send deployment notification to ClickUp
+      env:
+        CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
+        CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
+        CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
       run: |
           MESSAGE="**${GITHUB_ACTOR}** pushed changes to *${GITHUB_REPOSITORY}*
           Commit: \`${GITHUB_SHA}\`  
@@ -40,7 +44,3 @@ jobs:
               --arg content_format "text/md" \
               --arg content "$MESSAGE" \
               '{type: $type, content_format: $content_format, content: $content}')"
-          env:
-            CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
-            CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
-            CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
