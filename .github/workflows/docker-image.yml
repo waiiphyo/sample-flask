@@ -51,7 +51,7 @@ jobs:
             STATUS_ICON="🔴"
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
-            FAIL_REASON="**Job:** $JOB_NAME"
+            FAIL_REASON="$JOB_NAME"
             MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
@@ -59,7 +59,7 @@ jobs:
             **Commit Message:** ${COMMIT_MESSAGE}
             **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}
-            **Failed By:** ${FAIL_REASON}"
+            **Failed On:** ${FAIL_REASON}"
 
           fi
       
