@@ -28,9 +28,7 @@ jobs:
     steps:
       - name: Send deployment notification to ClickUp
         run: |
-          MESSAGE="**${GITHUB_ACTOR}** pushed changes to *${GITHUB_REPOSITORY}*  
-          Commit: \`${GITHUB_SHA}\`  
-          Message: ${GITHUB_EVENT_HEAD_COMMIT_MESSAGE}"
+          MESSAGE="**${GITHUB_ACTOR}** pushed changes to *${GITHUB_REPOSITORY}*"
 
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
