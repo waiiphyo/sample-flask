@@ -42,7 +42,7 @@ jobs:
             STATUS_ICON="🔴"
             STATUS_TEXT="**FAILURE**"
             JOB_NAME="${{ github.job }}"
-            STEP_NAME="${{ steps.build_step.name }}"
+            STEP_NAME="${{ steps.name }}"
             FAIL_REASON="**Job:** $JOB_NAME | **Failed Step:** $STEP_NAME"
           fi
           
