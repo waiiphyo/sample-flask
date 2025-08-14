@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Docker login
-      run : docker login -u ${{ secrets.DOCKER_USR }} -p ${{ secrets.DOCKER_PASSWORD }}
+      run : docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
     - name: Build the Docker image
       run: docker build -t sflask:latest .
     - name: Tags
