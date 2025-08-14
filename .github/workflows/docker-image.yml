@@ -41,7 +41,9 @@ jobs:
           else
             STATUS_ICON="🔴"
             STATUS_TEXT="**FAILURE**"
-            FAIL_REASON="${{ github.job }}${{ steps.build_step.name }} **Triggered By:** ${GITHUB_ACTOR}"
+            JOB_NAME="${{ github.job }}"
+            STEP_NAME="${{ steps.build_step.name }}"
+            FAIL_REASON="**Job:** $JOB_NAME | **Failed Step:** $STEP_NAME"
           fi
           
           MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
@@ -50,7 +52,7 @@ jobs:
           **Description:** New changes apply on : \`${GITHUB_REPOSITORY}\`
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
           **Pushed By:** ${GITHUB_ACTOR}
-          **FAIL_JOB:** ${FAIL_REASON}"
+          **Fail Step:** ${FAIL_REASON}"
 
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
