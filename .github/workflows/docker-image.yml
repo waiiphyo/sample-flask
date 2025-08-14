@@ -56,7 +56,8 @@ jobs:
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
           **Color:** #5144f4  
           **Repo:** [View Repo](${REPO_LINK})  
-          **Pushed By:** ${GITHUB_ACTOR}"
+          **Pushed By:** ${GITHUB_ACTOR}
+          **Triggered By:** ${GITHUB_ACTOR}${FAIL_REASON}"
 
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
