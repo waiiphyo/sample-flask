@@ -47,10 +47,13 @@ jobs:
           fi
           
           MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
-          **Repository:** [${GITHUB_REPOSITORY}](${REPO_LINK})  
-          **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
-          **Description:** New changes apply on : \`${GITHUB_REPOSITORY}\`
-          **Pushed By:** ${GITHUB_ACTOR}
+          **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
+          **Commit :** [${GITHUB_SHA::7}](${COMMIT_LINK})  
+          **Description :** New changes apply on : \`${GITHUB_REPOSITORY}\`
+          **Pushed By :** ${GITHUB_ACTOR}
+          **Based By :** ${GITHUB_BASE_REF}
+          **Branch :** ${GITHUB_REF_NAME}
+          **Summary :** ${GITHUB_STEP_SUMMARY}
           **Failed By:** ${FAIL_REASON}"
 
           curl --request POST \
