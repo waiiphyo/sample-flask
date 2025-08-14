@@ -24,7 +24,14 @@ jobs:
       run : |   
         docker push ${{ secrets.DOCKER_USER }}/sflask:latest
  
+    - name: Capture failure reason
+      if: failure()
+      run: |
+        echo "❌ Build failed because one of the test scripts returned a non-zero exit code." > fail_reason.txt
+        continue-on-error: true
+
     - name: Send deployment notification to ClickUp
+      if: always()
       env:
         CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
         CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
@@ -32,11 +39,21 @@ jobs:
       run: |
           REPO_LINK="https://github.com/${GITHUB_REPOSITORY}"
           COMMIT_LINK="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+          
+           if [ "${{ job.status }}" = "success" ]; then
+            STATUS_ICON="🟢"
+            STATUS_TEXT="**SUCCESS**"
+            FAIL_REASON=""
+          else
+            STATUS_ICON="🔴"
+            STATUS_TEXT="**FAILURE**"
+            FAIL_REASON="\n**Reason:** $(cat fail_reason.txt)"
+          fi
+          
           MESSAGE="**Build Status:** ${{ job.status }}  
           **Title:** Build  
           **Description:** New changes apply on : \`${GITHUB_REPOSITORY}\`
           **Commit:** [${GITHUB_SHA::7}](${COMMIT_LINK})  
-          **Commit Message:** ${GITHUB_EVENT_HEAD_COMMIT_MESSAGE}  
           **Color:** #5144f4  
           **Repo:** [View Repo](${REPO_LINK})  
           **Pushed By:** ${GITHUB_ACTOR}"
