@@ -28,18 +28,20 @@ jobs:
     steps:
       - name: Send deployment notification to ClickUp
         run: |
-          MESSAGE="**${GITHUB_ACTOR}** pushed changes to *${GITHUB_REPOSITORY}*"
+          MESSAGE="**${GITHUB_ACTOR}** pushed changes to *${GITHUB_REPOSITORY}*
+          Commit: \`${GITHUB_SHA}\`  
+          Message: ${GITHUB_EVENT_HEAD_COMMIT_MESSAGE}"
 
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
             --header "Authorization: ${CLICKUP_API_TOKEN}" \
             --header "accept: application/json" \
             --header "content-type: application/json" \
-            --data '{
-              \"type\": \"message\",
-              \"content_format\": \"text/md\",
-              \"content\": \"$MESSAGE\"
-            }'
+            --data "$(jq -n \
+              --arg type "message" \
+              --arg content_format "text/md" \
+              --arg content "$MESSAGE" \
+              '{type: $type, content_format: $content_format, content: $content}')"
         env:
           CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
           CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
