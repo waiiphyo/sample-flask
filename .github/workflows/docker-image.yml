@@ -23,17 +23,6 @@ jobs:
     - name: Push to docker hub
       run : |   
         docker push ${{ secrets.DOCKER_USER }}/sflask:latest
-      
-    - name: Run build/tests and capture output
-      id: build_step
-      run: |
-        set +e
-        OUTPUT=$(./run-tests.sh 2>&1)
-        EXIT_CODE=$?
-        echo "output<<EOF" >> $GITHUB_OUTPUT
-        echo "$OUTPUT" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-        exit $EXIT_CODE
 
     - name: Send deployment notification to ClickUp
       if: always()
@@ -52,7 +41,7 @@ jobs:
           else
             STATUS_ICON="🔴"
             STATUS_TEXT="**FAILURE**"
-            FAIL_REASON="\n**Reason:**\n\`\`\`\n${{ steps.build_step.outputs.output }}\n\`\`\`"
+            FAIL_REASON="\n**Failed Job:** ${{ github.job }}"
           fi
           
           MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
