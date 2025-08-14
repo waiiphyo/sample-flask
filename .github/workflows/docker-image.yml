@@ -23,12 +23,17 @@ jobs:
     - name: Push to docker hub
       run : |   
         docker push ${{ secrets.DOCKER_USER }}/sflask:latest
- 
-    - name: Capture failure reason
-      if: failure()
+      
+    - name: Run build/tests and capture output
+      id: build_step
       run: |
-        echo "❌ Build failed because one of the test scripts returned a non-zero exit code." > fail_reason.txt
-      continue-on-error: true
+        set +e
+        OUTPUT=$(./run-tests.sh 2>&1)
+        EXIT_CODE=$?
+        echo "output<<EOF" >> $GITHUB_OUTPUT
+        echo "$OUTPUT" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        exit $EXIT_CODE
 
     - name: Send deployment notification to ClickUp
       if: always()
@@ -47,7 +52,7 @@ jobs:
           else
             STATUS_ICON="🔴"
             STATUS_TEXT="**FAILURE**"
-            FAIL_REASON="\n**Reason:** $(cat fail_reason.txt)"
+            FAIL_REASON="\n**Reason:**\n\`\`\`\n${{ steps.build_step.outputs.output }}\n\`\`\`"
           fi
           
           MESSAGE="Build Status: ${STATUS_TEXT} ${STATUS_ICON} 
