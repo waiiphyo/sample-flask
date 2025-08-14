@@ -23,11 +23,9 @@ jobs:
     - name: Push to docker hub
       run : |   
         docker push ${{ secrets.DOCKER_USER }}/sflask:latest
-  notify:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send deployment notification to ClickUp
-        run: |
+ 
+    - name: Send deployment notification to ClickUp
+      run: |
           MESSAGE="**${GITHUB_ACTOR}** pushed changes to *${GITHUB_REPOSITORY}*
           Commit: \`${GITHUB_SHA}\`  
           Message: ${GITHUB_EVENT_HEAD_COMMIT_MESSAGE}"
@@ -42,7 +40,7 @@ jobs:
               --arg content_format "text/md" \
               --arg content "$MESSAGE" \
               '{type: $type, content_format: $content_format, content: $content}')"
-        env:
-          CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
-          CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
-          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+          env:
+            CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
+            CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
+            CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
