@@ -85,8 +85,7 @@ jobs:
             print line "|"
           }
         }' trivy-rows.tmp > trivy-markdown.md
-
-        rm trivy-rows.tmp
+        
 
     - name: Push to docker hub
       if: success()
