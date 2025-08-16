@@ -41,10 +41,10 @@ jobs:
         format: 'table'
         output: 'trivy-report.md'
         
-    - name: Convert Trivy ASCII table to Markdown table
-      if: always()
-      run: |
-        sed -i 's/[┐┘┤┴┬┌└]//g' trivy-report.md > trivy-markdown.md
+    #- name: Convert Trivy ASCII table to Markdown table
+    #  if: always()
+    #  run: |
+    #    sed -E 's/[\u2500-\u257F&&[^\u2502]]//g' trivy-report.md > trivy-markdown.md
 
     - name: Push to docker hub
       if: success()
@@ -79,7 +79,7 @@ jobs:
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="$JOB_NAME"
-            REPORT=$(cat trivy-markdown.md || echo "No scan report available")
+            REPORT=$(cat trivy-report.md || echo "No scan report available")
             #REPORT=$(sed 's/│/|/g' trivy-report.md | awk '
             #BEGIN { FS="|"; OFS="|" }
             #NF>1 { gsub(/\n/, " "); print }
