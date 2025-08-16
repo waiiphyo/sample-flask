@@ -45,12 +45,44 @@ jobs:
       if: always()
       run: |
           cat trivy-report.md \
-            | grep "│" \
-            | sed 's/│/|/g' \
-            | sed 's/^| \+//; s/ \+|$//g' \
-            | sed 's/ \+/ /g' \
-            | awk 'NR==1{print; gsub(/[^|]/,"-"); print; next} {print}' \
-            > trivy-markdown.md
+          | grep "│" \                               # keep only table rows
+          | sed 's/│/|/g' \                          # replace box-drawing │ with ASCII |
+          | sed 's/^| \+//; s/ \+|$//g' \            # trim leading/trailing pipes + spaces
+          | sed 's/ \+/ /g' \                        # collapse extra spaces
+          | awk -F'|' '
+          NR==1 {
+            # header
+            print; gsub(/[^|]/,"-"); print; next
+          }
+          {
+            # check if row is mostly empty → continuation of last row
+            empty=0
+            for (i=1; i<=NF; i++) if ($i ~ /^[ \t]*$/) empty++
+            if (empty >= NF-2) {
+              # continuation → append non-empty fields to last row
+              for (i=1; i<=NF; i++) {
+                if ($i !~ /^[ \t]*$/) {
+                rows[NR-1,i] = rows[last,i] " " $i
+                }
+              }
+            } else {
+            # new row
+            last=NR-1
+            for (i=1; i<=NF; i++) rows[NR-1,i]=$i
+            order[++count]=NR-1
+            }
+          }
+          END {
+            for (n=1; n<=count; n++) {
+            line=""
+            for (i=1; i<=NF; i++) {
+              val=rows[order[n],i]
+              gsub(/^[ \t]+|[ \t]+$/,"",val)
+              line=line "|" val
+            }
+            print line "|"
+          }
+          }' > trivy-markdown.m
 
     - name: Push to docker hub
       if: success()
