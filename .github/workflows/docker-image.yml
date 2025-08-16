@@ -42,6 +42,7 @@ jobs:
         output: 'trivy-report.md'
         
     - name: Convert ASCII report to Markdown table
+      if: always()
       run: |
           cat trivy-report.md \
             | grep "│" \
