@@ -38,11 +38,8 @@ jobs:
         exit-code: '1'   # exit with error if vulnerabilities found
         ignore-unfixed: true
         vuln-type: 'os,library'
-        
-    #- name: Tags
-    #  run: |
-    #    docker tag sflask ${{ secrets.DOCKER_USER }}/sflask:${{ github.sha }}
-
+        format: 'table'
+        output: 'trivy-report.md'
     
     - name: Push to docker hub
       if: success()
@@ -77,6 +74,7 @@ jobs:
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="$JOB_NAME"
+            REPORT=$(cat trivy-report.md || echo "No scan report available")
             MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
             **Repository :** [${GITHUB_REPOSITORY}](${REPO_LINK})  
@@ -84,9 +82,18 @@ jobs:
             **Commit Message:** ${COMMIT_MESSAGE}
             **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}
-            **Failed On:** ${FAIL_REASON}"
+            **Failed On:** ${FAIL_REASON}
+
+            #### 🔍 Trivy Scan Report
+            \`\`\`md
+            $REPORT
+            \`\`\`"
 
           fi
+          echo "MESSAGE<<EOF" >> $GITHUB_ENV
+          echo "$MESSAGE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       
           curl --request POST \
             --url "https://api.clickup.com/api/v3/workspaces/${CLICKUP_WORKSPACE_ID}/chat/channels/${CLICKUP_CHANNEL_ID}/messages" \
