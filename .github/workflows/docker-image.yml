@@ -38,7 +38,7 @@ jobs:
         exit-code: '1'   # exit with error if vulnerabilities found
         ignore-unfixed: true
         vuln-type: 'os,library'
-        format: 'json'
+        format: 'table'
         #output: 'trivy-report.md'
         
     #- name: Convert Trivy ASCII table to Markdown table
