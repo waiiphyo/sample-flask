@@ -3,6 +3,8 @@ name: Docker Image CI
 on:
   push:
     branches: [ main ]
+env:
+  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/sflask
 
 jobs:
 
@@ -11,18 +13,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v4
+      
     - name: Docker login
-      run : docker login -u ${{ secrets.DOCKER_USR }} -p ${{ secrets.DOCKER_PASSWORD }}
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERN }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+      #run : docker login -u ${{ secrets.DOCKER_USR }} -p ${{ secrets.DOCKER_PASSWORD }}
+      
     - name: Build the Docker image
-      run: docker build -t sflask:latest .
-    - name: Tags
       run: |
-        docker tag sflask ${{ secrets.DOCKER_USER }}/sflask:${{ github.sha }}
-        docker tag sflask ${{ secrets.DOCKER_USER }}/sflask:latest
+        IMAGE_TAG=${GITHUB_SHA::7}
+        docker build -t $IMAGE_NAME:$IMAGE_TAG .
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.20.0
+      with:
+        image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        severity: CRITICAL,HIGH
+        exit-code: '1'   # exit with error if vulnerabilities found
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        
+    #- name: Tags
+    #  run: |
+    #    docker tag sflask ${{ secrets.DOCKER_USER }}/sflask:${{ github.sha }}
+
+    
     - name: Push to docker hub
+      if: success()
       run : |   
-        docker push ${{ secrets.DOCKER_USER }}/sflask:latest
+          docker push $IMAGE_NAME:${IMAGE_TAG}
 
     - name: Send deployment notification to ClickUp
       if: always()
