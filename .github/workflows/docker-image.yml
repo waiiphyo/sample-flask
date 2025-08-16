@@ -40,7 +40,17 @@ jobs:
         vuln-type: 'os,library'
         format: 'table'
         output: 'trivy-report.md'
-    
+        
+    - name: Convert ASCII report to Markdown table
+      run: |
+          cat trivy-report.md \
+            | grep "│" \
+            | sed 's/│/|/g' \
+            | sed 's/^| \+//; s/ \+|$//g' \
+            | sed 's/ \+/ /g' \
+            | awk 'NR==1{print; gsub(/[^|]/,"-"); print; next} {print}' \
+            > trivy-markdown.md
+
     - name: Push to docker hub
       if: success()
       run : |   
@@ -74,17 +84,11 @@ jobs:
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="$JOB_NAME"
-            ##REPORT=$(cat trivy-report.md || echo "No scan report available")
+            REPORT=$(cat trivy-markdown.md || echo "No scan report available")
             #REPORT=$(sed 's/│/|/g' trivy-report.md | awk '
             #BEGIN { FS="|"; OFS="|" }
             #NF>1 { gsub(/\n/, " "); print }
             #')
-            REPORT=$(cat trivyscan-report.md \
-            | grep "│" \                   
-            | sed 's/│/|/g' \              
-            | sed 's/^| \+//; s/ \+|$//g' \ 
-            | sed 's/ \+/ /g' \            
-            | awk 'NR==1{print; gsub(/[^|]/,"-"); print; next} {print}')
 
             MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
