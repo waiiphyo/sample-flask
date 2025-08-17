@@ -110,6 +110,7 @@ jobs:
             result=$(jq -r --arg job "$job" '.[$job].result' needs.json)
             if [ "$result" = "failure" ]; then
               echo "### ❌ Job: $job" >> summary.md
+              failed="$failed $job"
               echo "(Steps info is only in logs)" >> summary.md
             elif [ "$result" = "success" ]; then
               echo "✅ Job: $job passed" >> summary.md
@@ -118,9 +119,11 @@ jobs:
             fi
           done
 
-          cat summary.md
+          failed=$(echo "$failed" | xargs) # trim spaces
+          echo "failed_jobs=$failed" >> $GITHUB_OUTPUT
+
           echo "summary<<EOF" >> $GITHUB_OUTPUT
-          cat summary.md >> $GITHUB_OUTPUT
+          cat summary.md
           echo "EOF" >> $GITHUB_OUTPUT
   
   Notify-Clickup:
@@ -165,7 +168,7 @@ jobs:
             STATUS_ICON="🔴"
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
-            FAIL_REASON="${{ needs.Summary.outputs.summary }}"
+            FAIL_REASON="${{needs.Summary.outputs.failed_jobs}}"
 
             MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
