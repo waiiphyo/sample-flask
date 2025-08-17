@@ -95,6 +95,7 @@ jobs:
   
   Notify-Clickup:
     name: clickup notification
+    needs: Scan_and_Push
     runs-on: ubuntu-latest
     if: always()
     steps:
