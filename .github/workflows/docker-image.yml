@@ -111,7 +111,7 @@ jobs:
           REPO_LINK="https://github.com/${GITHUB_REPOSITORY}"
           COMMIT_LINK="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
           
-          if [ "${{ job.status }}" = "success" ]; then
+          if [ "${{ needs.Scan_and_Push.result }}" = "success" ]; then
     
             STATUS_ICON="🟢"
             STATUS_TEXT="SUCCESS"
