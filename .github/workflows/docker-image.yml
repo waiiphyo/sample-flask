@@ -8,8 +8,8 @@ env:
 
 jobs:
 
-  build:
-
+  Build:
+    name: build
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,12 @@ jobs:
         IMAGE_TAG=${GITHUB_SHA::7}
         docker build -t $IMAGE_NAME:$IMAGE_TAG .
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-    
+
+  Scan_and_Push:
+    name: scan and push
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
     - name: Run Trivy scan Report
       uses: aquasecurity/trivy-action@0.21.0
       with:
@@ -74,28 +79,35 @@ jobs:
           path: reports/trivy-report.md
           retention-days: 1
           
-    - name: Generate Artifact URL
-      if: always()
-      id: artifact
-      run: |
-          run_id=${{ github.run_id }}
-          repo=${{ github.repository }}
-          # echo "artifact_url=https://github.com/$repo/actions/runs/$run_id/artifacts" >> $GITHUB_OUTPUT
-          echo "https://github.com/$repo/actions/runs/$run_id/artifacts"
-
+    #- name: Generate Artifact URL
+    #  if: always()
+    #  id: artifact
+    #  run: |
+    #      run_id=${{ github.run_id }}
+    #      repo=${{ github.repository }}
+    #      # echo "artifact_url=https://github.com/$repo/actions/runs/$run_id/artifacts" >> $GITHUB_OUTPUT
+    #      echo "https://github.com/$repo/actions/runs/$run_id/artifacts"
 
     - name: Push to docker hub
       if: success()
       run : |   
           docker push $IMAGE_NAME:${IMAGE_TAG}
-
+  
+  Notify-Clickup:
+    name: clickup notification
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+  
     - name: Send deployment notification to ClickUp
-      if: always()
       env:
         CLICKUP_WORKSPACE_ID: ${{ secrets.CLICKUP_WORKSPACE_ID }}
         CLICKUP_CHANNEL_ID: ${{ secrets.CLICKUP_CHANNEL_ID }}
         CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        repo: ${{ github.repository }}
+        run_id: ${{ github.run_id }}
+
       run: |
           REPO_LINK="https://github.com/${GITHUB_REPOSITORY}"
           COMMIT_LINK="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
@@ -138,7 +150,7 @@ jobs:
             - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             - 🔴 CRITICAL: **${{ steps.vuln.outputs.critical }}**
             - 🟠 HIGH: **${{ steps.vuln.outputs.high }}**
-            - 📄 [Download full report]('${{ steps.artifact.outputs.url }}') (retained for 1 day)"
+            - 📄 [Download full report]('https://github.com/${repo}/actions/runs/${run_id}') (retained for 1 day)"
             
           fi
       
