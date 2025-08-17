@@ -103,7 +103,8 @@ jobs:
           JOBS="Build Scan_and_Push"
           echo "## Failed Jobs & Steps" > summary.md
           for job in $JOBS; do
-            job_result="${{ needs.[job].result }}"
+            job_result="${{ needs[job].result }}"
+            echo $job_result
             if [ "$job_result" = "failure" ]; then
               echo "### ❌ Job: $job" >> summary.md
               # check logs for failed steps
