@@ -120,7 +120,7 @@ jobs:
   
   Notify-Clickup:
     name: clickup notification
-    needs: Scan_and_Push
+    needs: [Scan_and_Push, Summary]
     runs-on: ubuntu-latest
     if: always()
     steps:
