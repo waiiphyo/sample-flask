@@ -21,49 +21,12 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-
-      #run : docker login -u ${{ secrets.DOCKER_USR }} -p ${{ secrets.DOCKER_PASSWORD }}
       
     - name: Build the Docker image
       run: |
         IMAGE_TAG=${GITHUB_SHA::7}
         docker build -t $IMAGE_NAME:$IMAGE_TAG .
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-        
-    #- name: Install Trivy
-    #  run: |
-    #      sudo apt-get update
-    #      sudo apt-get install -y wget gnupg lsb-release
-    #      wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-    #      echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
-    #      sudo apt-get update
-    #      sudo apt-get install -y trivy
-
-    #- name: Create Markdown template
-    #  run: |
-    #      cat <<'EOT' > .github/trivy-markdown.tpl
-    #      # Trivy Scan Report
-
-    #      Target: {{ .ArtifactName }}
-
-    #     | Library | Vulnerability | Severity | Installed | Fixed | Link |
-    #      |---------|---------------|----------|-----------|-------|------|
-    #      {{- range .Results }}
-    #      {{- range .Vulnerabilities }}
-    #      | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .InstalledVersion }} | {{ .FixedVersion }} | [Details]({{ .PrimaryURL }}) |
-    #      {{- end }}
-    #     {{ end }}
-    #      EOT
-
-    #- name: Scan docker image
-    #  run: |
-    #      trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
-    #        --format template \
-    #        --template "@.github/trivy-markdown.tpl" \
-    #        -o trivy-report.md
-
-    #     trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
-    #       --format json -o trivy-report.json
 
     - name: Run Trivy scan (Markdown)
       uses: aquasecurity/trivy-action@0.21.0
@@ -138,8 +101,10 @@ jobs:
             **Commit Message:** ${COMMIT_MESSAGE}
             **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}
+
+            ---
             ### 🐳 Trivy Docker image scan completed 
-            ** Image : ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ** Image :** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             - 🔴 CRITICAL: **'${{ steps.vuln.outputs.critical }}'**
             - 🟠 HIGH: **'${{ steps.vuln.outputs.high }}'**"
             
@@ -157,8 +122,10 @@ jobs:
             **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}
             **Failed On:** ${FAIL_REASON}
+
+            ---
             ### 🐳 Trivy Docker image scan completed
-            ** Image : ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ** Image :** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             - 🔴 CRITICAL: **'${{ steps.vuln.outputs.critical }}'**
             - 🟠 HIGH: **'${{ steps.vuln.outputs.high }}'**
             - 📄 [Download full report]('${{ steps.artifact.outputs.url }}') (retained for 1 days)"
