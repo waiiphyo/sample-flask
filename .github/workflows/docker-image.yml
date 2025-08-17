@@ -39,7 +39,7 @@ jobs:
         ignore-unfixed: true
         vuln-type: 'os,library'
         format: 'table'
-        #output: 'trivy-report.md'
+        output: 'trivy-report.md'
         
     #- name: Convert Trivy ASCII table to Markdown table
     #  if: always()
@@ -79,7 +79,7 @@ jobs:
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
             FAIL_REASON="$JOB_NAME"
-            #REPORT=$(cat trivy-report.md || echo "No scan report available")
+            REPORT=$(cat trivy-report.md || echo "No scan report available")
             #REPORT=$(sed 's/│/|/g' trivy-report.md | awk '
             #BEGIN { FS="|"; OFS="|" }
             #NF>1 { gsub(/\n/, " "); print }
@@ -97,15 +97,15 @@ jobs:
             ---
 
             #### 🔍 Trivy Scan Report
-            ###---
-            ###\`\`\`md
-            ####$REPORT
-            ###\`\`\`"
+            ---
+            \`\`\`md
+            $REPORT
+            \`\`\`"
 
           fi
-          ##echo "MESSAGE<<EOF" >> $GITHUB_ENV
-          ##echo "$MESSAGE" >> $GITHUB_ENV
-          ##echo "EOF" >> $GITHUB_ENV
+          echo "MESSAGE<<EOF" >> $GITHUB_ENV
+          echo "$MESSAGE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       
           curl --request POST \
