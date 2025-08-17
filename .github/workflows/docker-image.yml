@@ -59,14 +59,14 @@ jobs:
           severity: CRITICAL,HIGH
           vuln-type: os,library
           format: json
-          output: trivy-report.json
+          output: reports/trivy-report.json
 
     - name: Count vulnerabilities by severity
       if: always()
       id: vuln
       run: |
-          high=$(jq '[.. | .Severity? // empty | select(. == "HIGH")] | length' trivy-report.json)
-          critical=$(jq '[.. | .Severity? // empty | select(. == "CRITICAL")] | length' trivy-report.json)
+          high=$(jq '[.. | .Severity? // empty | select(. == "HIGH")] | length' reports/trivy-report.json)
+          critical=$(jq '[.. | .Severity? // empty | select(. == "CRITICAL")] | length' reports/trivy-report.json)
 
           echo "high=$high" >> $GITHUB_OUTPUT
           echo "critical=$critical" >> $GITHUB_OUTPUT
