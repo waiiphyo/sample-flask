@@ -104,7 +104,7 @@ jobs:
           echo "## Failed Jobs & Steps" > summary.md
           for job in $JOBS; do
             job_result="${{ needs[job].result }}"
-            echo $job_result
+            echo $job_result >> $GITHUB_OUTPUT
             if [ "$job_result" = "failure" ]; then
               echo "### ❌ Job: $job" >> summary.md
               # check logs for failed steps
