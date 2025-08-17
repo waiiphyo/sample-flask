@@ -30,40 +30,60 @@ jobs:
         docker build -t $IMAGE_NAME:$IMAGE_TAG .
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         
-    - name: Install Trivy
-      run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
+    #- name: Install Trivy
+    #  run: |
+    #      sudo apt-get update
+    #      sudo apt-get install -y wget gnupg lsb-release
+    #      wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+    #      echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+    #      sudo apt-get update
+    #      sudo apt-get install -y trivy
 
-    - name: Create Markdown template
-      run: |
-          cat <<'EOT' > .github/trivy-markdown.tpl
-          # Trivy Scan Report
+    #- name: Create Markdown template
+    #  run: |
+    #      cat <<'EOT' > .github/trivy-markdown.tpl
+    #      # Trivy Scan Report
 
-          Target: {{ .ArtifactName }}
+    #      Target: {{ .ArtifactName }}
 
-          | Library | Vulnerability | Severity | Installed | Fixed | Link |
-          |---------|---------------|----------|-----------|-------|------|
-          {{- range .Results }}
-          {{- range .Vulnerabilities }}
-          | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .InstalledVersion }} | {{ .FixedVersion }} | [Details]({{ .PrimaryURL }}) |
-          {{- end }}
-          {{ end }}
-          EOT
+    #     | Library | Vulnerability | Severity | Installed | Fixed | Link |
+    #      |---------|---------------|----------|-----------|-------|------|
+    #      {{- range .Results }}
+    #      {{- range .Vulnerabilities }}
+    #      | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .InstalledVersion }} | {{ .FixedVersion }} | [Details]({{ .PrimaryURL }}) |
+    #      {{- end }}
+    #     {{ end }}
+    #      EOT
 
-    - name: Scan docker image
-      run: |
-          trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
-            --format template \
-            --template "@.github/trivy-markdown.tpl" \
-            -o trivy-report.md
+    #- name: Scan docker image
+    #  run: |
+    #      trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+    #        --format template \
+    #        --template "@.github/trivy-markdown.tpl" \
+    #        -o trivy-report.md
 
-          trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
-            --format json -o trivy-report.json
+    #     trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+    #       --format json -o trivy-report.json
+
+    - name: Run Trivy scan (Markdown)
+      uses: aquasecurity/trivy-action@0.21.0
+      with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          severity: CRITICAL,HIGH
+          exit-code: '1' 
+          format: template
+          template: "@.github/trivy-markdown.tpl"
+          output: trivy-report.md
+
+    # Run Trivy scan (JSON) for severity count
+    - name: Run Trivy scan (JSON)
+      if: success()
+      uses: aquasecurity/trivy-action@0.21.0
+      with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          severity: CRITICAL,HIGH
+          format: json
+          output: trivy-report.json
 
     - name: Count vulnerabilities by severity
       if: always()
@@ -75,27 +95,6 @@ jobs:
           echo "high=$high" >> $GITHUB_OUTPUT
           echo "critical=$critical" >> $GITHUB_OUTPUT
 
-          
-    #- name: Run Trivy vulnerability scanner
-    #  uses: aquasecurity/trivy-action@0.20.0
-    #  with:
-    #    image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-    #    severity: CRITICAL,HIGH
-    #    exit-code: '1'   # exit with error if vulnerabilities found
-    #    ignore-unfixed: true
-    #    vuln-type: 'os,library'
-    #    format: 'table'
-    #    output: 'trivy-report.md'
-
-    #- name: Upload report to ClickUp Task
-    #  if: always()
-    #  run: |
-    #    response=$(curl -s -X POST "https://api.clickup.com/api/v2/task/${{ secrets.CLICKUP_TASK_ID }}/attachment" \
-    #    -H "Authorization: ${{ secrets.CLICKUP_API_TOKEN }}" \
-    #    -F "attachment=@trivy-report.md")
-
-    #    url=$(echo "$response" | jq -r '.url')
-    #    echo "file_url=$url" >> $GITHUB_ENV
     - name: Upload Trivy report as artifact
       if: always()
       uses: actions/upload-artifact@v4
@@ -110,7 +109,7 @@ jobs:
       run: |
           run_id=${{ github.run_id }}
           repo=${{ github.repository }}
-          echo "url=https://github.com/$repo/actions/runs/$run_id/artifacts" >> $GITHUB_OUTPUT
+          echo "artifact_url=https://github.com/$repo/actions/runs/$run_id/artifacts" >> $GITHUB_OUTPUT
 
     - name: Push to docker hub
       if: success()
@@ -139,7 +138,8 @@ jobs:
             **Commit Message:** ${COMMIT_MESSAGE}
             **Description :** ${COMMIT_MESSAGE} on **${GITHUB_REF_NAME}** of \`${GITHUB_REPOSITORY}\`
             **Pushed By :** ${GITHUB_ACTOR}
-            ### 🐳 Trivy Docker image scan completed
+            ### 🐳 Trivy Docker image scan completed 
+            ** Image : ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             - 🔴 CRITICAL: **'${{ steps.vuln.outputs.critical }}'**
             - 🟠 HIGH: **'${{ steps.vuln.outputs.high }}'**"
             
@@ -158,6 +158,7 @@ jobs:
             **Pushed By :** ${GITHUB_ACTOR}
             **Failed On:** ${FAIL_REASON}
             ### 🐳 Trivy Docker image scan completed
+            ** Image : ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             - 🔴 CRITICAL: **'${{ steps.vuln.outputs.critical }}'**
             - 🟠 HIGH: **'${{ steps.vuln.outputs.high }}'**
             - 📄 [Download full report]('${{ steps.artifact.outputs.url }}') (retained for 1 days)"
