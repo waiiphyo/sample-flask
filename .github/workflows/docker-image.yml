@@ -149,7 +149,7 @@ jobs:
             - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             - 🔴 CRITICAL: **${{ needs.Scan_and_Push.outputs.CRITICAL }}**
             - 🟠 HIGH: **${{ needs.Scan_and_Push.outputs.HIGH }}**
-            - 📄 [Download full report]('https://github.com/${repo}/actions/runs/${run_id}') (retained for 1 day)"
+            - 📄 Download Report: ('https://github.com/${repo}/actions/runs/${run_id}')"
             
           fi
       
