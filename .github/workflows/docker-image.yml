@@ -90,6 +90,33 @@ jobs:
       if: success()
       run : |   
           docker push $IMAGE_NAME:${IMAGE_TAG}
+          
+  Summary:
+    name: summary
+    runs-on: ubuntu-latest
+    needs: [Build, Scan_and_Push]
+    if: always()
+    steps:
+      - name: Collect job + step failures
+        id: collect
+        run: |
+          JOBS="Build Scan_and_Push"
+          echo "## Failed Jobs & Steps" > summary.md
+          for job in $JOBS; do
+            job_result="${{ needs[job].result }}"
+            if [ "$job_result" = "failure" ]; then
+              echo "### ❌ Job: $job" >> summary.md
+              # check logs for failed steps
+              echo "(Steps info is only in logs by default)" >> summary.md
+            else
+              echo "✅ Job: $job passed" >> summary.md
+            fi
+          done
+
+          cat summary.md
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          cat summary.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
   
   Notify-Clickup:
     name: clickup notification
@@ -133,7 +160,7 @@ jobs:
             STATUS_ICON="🔴"
             STATUS_TEXT="FAILURE"
             JOB_NAME="${{ github.job }}"
-            FAIL_REASON="$JOB_NAME"
+            FAIL_REASON="${{ needs.Summary.outputs.summary }}"
 
             MESSAGE="#### Build Result Overview
             **Build Status :** ${STATUS_TEXT} ${STATUS_ICON} 
