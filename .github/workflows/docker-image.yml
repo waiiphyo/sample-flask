@@ -28,30 +28,30 @@ jobs:
         docker build -t $IMAGE_NAME:$IMAGE_TAG .
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         
-    - name: Create Markdown template
-      run: |
-          cat <<'EOT' > .github/trivy-markdown.tpl
-          # Trivy Scan Report
+    #- name: Create Markdown template
+    #  run: |
+    #      cat <<'EOT' > .github/trivy-markdown.tpl
+    #      # Trivy Scan Report
 
-          Target: {{ .ArtifactName }}
+    #      Target: {{ .ArtifactName }}
 
-          | Library | Vulnerability | Severity | Installed | Fixed | Link |
-          |---------|---------------|----------|-----------|-------|------|
-          {{- range .Results }}
-          {{- range .Vulnerabilities }}
-          | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .InstalledVersion }} | {{ .FixedVersion }} | [Details]({{ .PrimaryURL }}) |
-          {{- end }}
-          {{ end }}
-          EOT
+    #      | Library | Vulnerability | Severity | Installed | Fixed | Link |
+    #      |---------|---------------|----------|-----------|-------|------|
+    #      {{- range .Results }}
+    #      {{- range .Vulnerabilities }}
+    #      | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .InstalledVersion }} | {{ .FixedVersion }} | [Details]({{ .PrimaryURL }}) |
+    #      {{- end }}
+    #      {{ end }}
+    #      EOT
 
-    - name: Run Trivy scan (Markdown)
+    - name: Run Trivy scan Report
       uses: aquasecurity/trivy-action@0.21.0
       with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           severity: CRITICAL,HIGH
           exit-code: '1' 
-          format: template
-          template: "@.github/trivy-markdown.tpl"
+          format: "table"
+          #template: "@.github/trivy-markdown.tpl"
           output: trivy-report.md
 
     # Run Trivy scan (JSON) for severity count
@@ -119,10 +119,10 @@ jobs:
             **Pushed By :** ${GITHUB_ACTOR}
 
             ---
-            ### 🐳 Trivy Docker image scan completed ✅
+            ### Trivy Docker image scan completed ✅
             - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            - 🔴 CRITICAL: **'${{ steps.vuln.outputs.critical }}'**
-            - 🟠 HIGH: **'${{ steps.vuln.outputs.high }}'**"
+            - 🔴 CRITICAL: **${{ steps.vuln.outputs.critical }}**
+            - 🟠 HIGH: **${{ steps.vuln.outputs.high }}**"
             
           else
             STATUS_ICON="🔴"
@@ -140,11 +140,11 @@ jobs:
             **Failed On:** ${FAIL_REASON}
 
             ---
-            ### 🐳 Trivy Docker image scan completed ✅
+            ### Trivy Docker image scan completed ✅
             - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            - 🔴 CRITICAL: **'${{ steps.vuln.outputs.critical }}'**
-            - 🟠 HIGH: **'${{ steps.vuln.outputs.high }}'**
-            - 📄 [Download full report]('${{ steps.artifact.outputs.url }}') (retained for 1 days)"
+            - 🔴 CRITICAL: **${{ steps.vuln.outputs.critical }}**
+            - 🟠 HIGH: **${{ steps.vuln.outputs.high }}**
+            - 📄 [Download full report]('${{ steps.artifact.outputs.url }}') (retained for 1 day)"
             
           fi
       
