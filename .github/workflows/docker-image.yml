@@ -80,7 +80,9 @@ jobs:
       run: |
           run_id=${{ github.run_id }}
           repo=${{ github.repository }}
-          echo "artifact_url=https://github.com/$repo/actions/runs/$run_id/artifacts" >> $GITHUB_OUTPUT
+          # echo "artifact_url=https://github.com/$repo/actions/runs/$run_id/artifacts" >> $GITHUB_OUTPUT
+          echo "https://github.com/$repo/actions/runs/$run_id/artifacts"
+
 
     - name: Push to docker hub
       if: success()
