@@ -33,6 +33,10 @@ jobs:
     - name: Install Trivy
       run: |
           sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
           sudo apt-get install -y trivy
 
     - name: Create Markdown template
@@ -53,7 +57,7 @@ jobs:
 
     - name: Scan docker image
       run: |
-          trivy image my-docker-image:latest \
+          trivy image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
             --format template \
             --template "@.github/trivy-markdown.tpl" \
             -o trivy-report.md
