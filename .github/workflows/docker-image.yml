@@ -97,20 +97,24 @@ jobs:
     needs: [Build, Scan_and_Push]
     if: always()
     steps:
-      - name: Collect job + step failures
+      - name: Summarize failed jobs dynamically
         id: collect
         run: |
-          JOBS="Build Scan_and_Push"
-          echo "## Failed Jobs & Steps" > summary.md
-          for job in $JOBS; do
-            job_result="${{ needs[job].result }}"
-            echo $job_result >> $GITHUB_OUTPUT
-            if [ "$job_result" = "failure" ]; then
+          echo "## Jobs Summary" > summary.md
+
+          # Dump the whole "needs" context as JSON
+          echo '${{ toJSON(needs) }}' > needs.json
+
+          # Parse dynamically
+          for job in $(jq -r 'keys[]' needs.json); do
+            result=$(jq -r --arg job "$job" '.[$job].result' needs.json)
+            if [ "$result" = "failure" ]; then
               echo "### ❌ Job: $job" >> summary.md
-              # check logs for failed steps
-              echo "(Steps info is only in logs by default)" >> summary.md
-            else
+              echo "(Steps info is only in logs)" >> summary.md
+            elif [ "$result" = "success" ]; then
               echo "✅ Job: $job passed" >> summary.md
+            else
+              echo "⚪ Job: $job → $result" >> summary.md
             fi
           done
 
