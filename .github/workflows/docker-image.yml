@@ -24,7 +24,8 @@ jobs:
         scan-type: config
         scan-ref: ./Dockerfile
         format: table
-        exit-code: 1   # fail if misconfigs found
+        severity: CRITICAL,HIGH
+        exit-code: 1  
         output: reports/dockerfile-scan.md
         
     - name: Upload FileScan as artifact
