@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/sflask
-  IMAGE_TAG: ${{ GITHUB_SHA::7 }}
+  IMAGE_TAG: ${GITHUB_SHA::7}
 
 jobs:
 
