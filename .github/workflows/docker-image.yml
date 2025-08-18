@@ -8,8 +8,33 @@ env:
 
 jobs:
 
+  Dockerfile-scan:
+    name: FileScan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Scan Dockerfile with Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: config
+        scan-ref: ./Dockerfile
+        format: table
+        exit-code: 1   # fail if misconfigs found
+        output: reports/dockerfile-scan.md
+        
+    - name: Upload FileScan as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+          name: Dockerfile-report
+          path: reports/dockerfile-scan.md
+          retention-days: 1
+
   Build:
     name: build
+    needs: Dockerfile-scan
     runs-on: ubuntu-latest
     outputs:
       IMAGE_TAG: ${{ steps.set_tag.outputs.image_tag }}
@@ -44,7 +69,7 @@ jobs:
 
   Scan_and_Push:
     name: scan and push
-    needs: Build
+    needs: [Dockerfile-scan, Build]
     runs-on: ubuntu-latest
     outputs:
       HIGH: ${{ steps.vuln.outputs.high }}
@@ -116,7 +141,7 @@ jobs:
   Summary:
     name: summary
     runs-on: ubuntu-latest
-    needs: [Build, Scan_and_Push]
+    needs: [Dockerfile-scan, Build, Scan_and_Push]
     outputs:
       failed_jobs_name: ${{ steps.collect.outputs.failed }}
     if: always()
@@ -152,7 +177,7 @@ jobs:
   
   Notify-Clickup:
     name: clickup notification
-    needs: [Build, Scan_and_Push, Summary]
+    needs: [Dockerfile-scan, Build, Scan_and_Push, Summary]
     runs-on: ubuntu-latest
     if: always()
     steps:
