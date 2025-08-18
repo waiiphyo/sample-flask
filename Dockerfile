@@ -11,6 +11,12 @@ RUN pip install --upgrade pip setuptools wheel
 
 RUN pip install -r /app/requirements.txt
 
+# Create a non-root user
+RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
+
+# Switch to non-root
+USER appuser
+
 # Make port 80 available to the world outside this container
 EXPOSE 5000
 
