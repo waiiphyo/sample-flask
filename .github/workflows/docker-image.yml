@@ -32,6 +32,16 @@ jobs:
       run: |
         docker build -t $IMAGE_NAME:${{ steps.set_tag.outputs.image_tag }} .
 
+    - name: Save Docker image as artifact
+      run: |
+          IMAGE_TAG=${{ steps.set_tag.outputs.image_tag }}
+          docker save $IMAGE_NAME:$IMAGE_TAG | gzip > image.tar.gz
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: docker-image
+        path: image.tar.gz
+
   Scan_and_Push:
     name: scan and push
     needs: Build
@@ -46,6 +56,14 @@ jobs:
 
     - name: Create reports folder
       run: mkdir -p reports
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: docker-image
+
+    - name: Load Docker image
+      run: |
+        docker load < image.tar.gz
       
     - name: Run Trivy scan Report
       uses: aquasecurity/trivy-action@0.21.0
