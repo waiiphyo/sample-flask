@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return 'Hello, Flask on Docker! add clickup channel webhook'
+    return 'Hello, Flask on Docker! add clickup channel webhook | scan with trivy image scanner'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
