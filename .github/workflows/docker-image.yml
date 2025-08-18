@@ -5,13 +5,14 @@ on:
     branches: [ main ]
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/sflask
-  IMAGE_TAG: ${GITHUB_SHA::7}
 
 jobs:
 
   Build:
     name: build
     runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG: ${{ steps.set_tag.outputs.image_tag }}
 
     steps:
     - name: Checkout
@@ -22,11 +23,14 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Set IMAGE_TAG
+      id: set_tag
+      run: echo "image_tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
       
     - name: Build the Docker image
       run: |
-        docker build -t $IMAGE_NAME:$IMAGE_TAG .
-        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        docker build -t $IMAGE_NAME:${{ steps.set_tag.outputs.image_tag }} .
 
   Scan_and_Push:
     name: scan and push
@@ -46,7 +50,7 @@ jobs:
     - name: Run Trivy scan Report
       uses: aquasecurity/trivy-action@0.21.0
       with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ env.IMAGE_NAME }}:${{ needs.Build.outputs.IMAGE_TAG }}
           severity: CRITICAL,HIGH
           vuln-type: os,library
           exit-code: '1' 
@@ -58,7 +62,7 @@ jobs:
       if: always()
       uses: aquasecurity/trivy-action@0.21.0
       with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ env.IMAGE_NAME }}:${{ needs.Build.outputs.IMAGE_TAG }}
           severity: CRITICAL,HIGH
           vuln-type: os,library
           format: json
@@ -89,7 +93,7 @@ jobs:
     - name: Push to docker hub
       if: success()
       run : |   
-          docker push $IMAGE_NAME:${IMAGE_TAG}
+          docker push $IMAGE_NAME:${{ needs.Build.outputs.IMAGE_TAG }}
           
   Summary:
     name: summary
@@ -130,7 +134,7 @@ jobs:
   
   Notify-Clickup:
     name: clickup notification
-    needs: [Scan_and_Push, Summary]
+    needs: [Build, Scan_and_Push, Summary]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -162,7 +166,7 @@ jobs:
 
             ---
             ### Trivy Docker image scan completed ✅
-            - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ needs.Build.outputs.IMAGE_TAG }}
             - 🔴 CRITICAL: **${{ needs.Scan_and_Push.outputs.CRITICAL }}**
             - 🟠 HIGH: **${{ needs.Scan_and_Push.outputs.HIGH }}**"
             
@@ -183,7 +187,7 @@ jobs:
 
             ---
             ### Trivy Docker image scan completed ✅
-            - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            - 🐳 Image: ${{ env.IMAGE_NAME }}:${{ needs.Build.outputs.IMAGE_TAG }}
             - 🔴 CRITICAL: **${{ needs.Scan_and_Push.outputs.CRITICAL }}**
             - 🟠 HIGH: **${{ needs.Scan_and_Push.outputs.HIGH }}**
             - 📄 Download Report: ('https://github.com/${repo}/actions/runs/${run_id}')"
