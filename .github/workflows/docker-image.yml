@@ -75,6 +75,10 @@ jobs:
     name: scan and push
     needs: [Dockerfile-scan, Build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     outputs:
       HIGH: ${{ steps.vuln.outputs.high }}
       CRITICAL: ${{ steps.vuln.outputs.critical }}
@@ -101,8 +105,16 @@ jobs:
           severity: CRITICAL,HIGH
           vuln-type: os,library
           exit-code: '1' 
-          format: "table"
-          output: reports/trivy-report.md
+          #format: "table"
+          format: "template"
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          #output: reports/trivy-report.md
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+          sarif_file: 'trivy-results.sarif'
 
     # Run Trivy scan (JSON) for severity count
     - name: Run Trivy scan (JSON)
