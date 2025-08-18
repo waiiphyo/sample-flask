@@ -5,6 +5,7 @@ on:
     branches: [ main ]
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/sflask
+  IMAGE_TAG: ${{ GITHUB_SHA::7 }}
 
 jobs:
 
@@ -24,7 +25,6 @@ jobs:
       
     - name: Build the Docker image
       run: |
-        IMAGE_TAG=${GITHUB_SHA::7}
         docker build -t $IMAGE_NAME:$IMAGE_TAG .
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
