@@ -15,6 +15,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Create reports folder
+      run: mkdir -p reports
+
     - name: Scan Dockerfile with Trivy
       uses: aquasecurity/trivy-action@master
       with:
